@@ -1,51 +1,28 @@
 import torch
-import random
-import time
 
-from AudioFileLoader import open_file, save_file
-from DataPreparer import prepare_data_loader, get_fragments
+from AudioFileLoader import save_file
 from DataProcessor import apply_mask_to_fragments
-from NetworkService import NetworkService
+from Services.NetworkService import NetworkService
+from Services.DatasetPreparerService import DatasetPreparerService
 
 audio_path = '../audio/КиШ- Лесник.mp3'
-music_path1 = '../audio/Король и Шут - Лесник (минус).mp3'
-music_path2 = '../audio/Король и шут - Ели мясо мужики минус.mp3'
-music_path3 = '../audio/Король и Шут - Марионетки (минус).mp3'
-voice_path1 = '../audio/Король и Шут - Сказка о мертвеце.mp3'
-voice_path2 = '../audio/Король и Шут(Страшные сказки) - Солдат и колдун.mp3'
-voice_path3 = '../audio/Король и Шут - Сказка про дракона.mp3'
+features_folder_path = '../audio/features'
+masks_folder_path = '../audio/masks'
 
 need_train = False
-need_create_audio = True
-
-def prepare_data_to_train(file_path, is_voice):
-    clear_amplitudes = open_file(file_path)
-    data_loader = prepare_data_loader(clear_amplitudes, is_voice)
-
-    return data_loader
+need_create_audio = False
+need_print_loss = True
 
 network_service = NetworkService(need_train)
+dataset_preparer_service = DatasetPreparerService()
 
 if need_train:
-    voice_data_loader1 = prepare_data_to_train(voice_path1, True)
-    voice_data_loader2 = prepare_data_to_train(voice_path2, True)
-    voice_data_loader3 = prepare_data_to_train(voice_path3, True)
-    music_data_loader1 = prepare_data_to_train(music_path1, False)
-    music_data_loader2 = prepare_data_to_train(music_path2, False)
-    music_data_loader3 = prepare_data_to_train(music_path3, False)
+    data_loader = dataset_preparer_service.prepare_data_to_train(features_folder_path, masks_folder_path)
 
-    data_loader = voice_data_loader1 + voice_data_loader2 + voice_data_loader3 + music_data_loader1 + music_data_loader2 + music_data_loader3
-    random.shuffle(data_loader)
-
-    start_time = time.time()
     network_service.train_network(data_loader)
-    end_time = time.time()
-    print('trained for {} sec'.format((end_time - start_time) / 1000))
 
 if need_create_audio:
-    clear_amplitudes = open_file(audio_path)
-
-    fragments = get_fragments(clear_amplitudes)
+    feature_amplitudes, fragments = dataset_preparer_service.prepare_audio_to_predict(audio_path)
 
     masks_for_fragments = network_service.get_fragments_masks(fragments)
 
@@ -57,7 +34,7 @@ if need_create_audio:
     import librosa.display
     import numpy as np
     fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True)
-    librosa.display.waveplot(np.array(clear_amplitudes), sr=20050, ax=ax[0])
+    librosa.display.waveplot(np.array(feature_amplitudes), sr=20050, ax=ax[0])
     ax[0].set(title='Vocal + Instrumental')
     ax[0].label_outer()
     librosa.display.waveplot(np.array(amplitudes), sr=20050, ax=ax[1])
@@ -65,11 +42,12 @@ if need_create_audio:
     ax[1].label_outer()
     plt.show()
 
-#import matplotlib.pyplot as plt
-#f = open("loss.txt", "r")
-#losses = f.read()
-#losses = losses.split(';')
-#losses = list(map(float, losses))
+if need_print_loss:
+    import matplotlib.pyplot as plt
+    f = open("loss.txt", "r")
+    losses = f.read()
+    losses = losses.split(';')
+    losses = list(map(float, losses))
 
-#plt.plot(losses)
-#plt.show()
+    plt.plot(losses)
+    plt.show()

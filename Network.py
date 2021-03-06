@@ -56,38 +56,16 @@ class Netrowk(nn.Module):
         self.linear_1 = nn.Sequential(
            nn.Linear(
                in_features=1824,
-               out_features=128),
+               out_features=256),
            nn.LeakyReLU())
         # (128) => (128)
         self.dropout_3 = nn.Dropout()
         # (128) => (513)
         self.linear_output = nn.Linear(
-            in_features=128,
+            in_features=256,
             out_features=513)
-        # (128) => (1)
-        self.linear_classifier = nn.Linear(
-            in_features=513,
-            out_features=1)
 
     def forward(self, fragment):
-        out = self.conv2d_input(fragment)
-        out = self.conv2d_1(out)
-        out = self.conv2d_2(out)
-        out = self.max_pool2d_1(out)
-        out = self.dropout_1(out)
-        out = self.conv2d_3(out)
-        out = self.conv2d_4(out)
-        out = self.max_pool2d_2(out)
-        out = self.dropout_2(out)
-        out = self.flatten(out)
-        out = self.linear_1(out)
-        out = self.dropout_3(out)
-        out = self.linear_output(out)
-        out = self.linear_classifier(out)
-
-        return out
-
-    def forward_without_classification(self, fragment):
         out = self.conv2d_input(fragment)
         out = self.conv2d_1(out)
         out = self.conv2d_2(out)
