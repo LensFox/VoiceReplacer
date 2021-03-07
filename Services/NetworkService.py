@@ -2,6 +2,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from time import time
 
 from Network import Netrowk
 
@@ -19,9 +20,12 @@ class NetworkService:
         train_loader, 
         num_epochs = 1, 
         learning_rate = 0.0001):
+        print('training started')
 
         criterion = nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(self.network.parameters(), lr = learning_rate)
+
+        start_time = time()
 
         total_steps = len(train_loader)
         loss_list = []
@@ -44,6 +48,10 @@ class NetworkService:
                           .format(epoch + 1, num_epochs, i + 1, total_steps, loss.item()))
 
         self.__save_model()
+
+        end_time = time()
+
+        print('training ended for {} s'.format((end_time - start_time) // 1000))
 
         open('loss.txt', 'w').write(';'.join(list(map(lambda x: str(x.tolist()), loss_list))))
         return loss_list

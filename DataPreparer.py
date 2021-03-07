@@ -30,7 +30,6 @@ def get_fragments(clear_amplitudes):
     fraims = make_fraims(amplitudes)
 
     fragments = zip_fraims_to_fragments(fraims)
-    #fragments = torch.Tensor(fragments)
 
     return fragments
 
