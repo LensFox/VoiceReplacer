@@ -75,7 +75,7 @@ class Netrowk(nn.Module):
         out = self.conv2d_4(out)
         out = self.max_pool2d_2(out)
         out = self.dropout_2(out)
-        out = self.flatten(out)
+        out = self.flatten(out, start_dim = 1)
         out = self.linear_1(out)
         out = self.dropout_3(out)
         out = self.linear_output(out)
