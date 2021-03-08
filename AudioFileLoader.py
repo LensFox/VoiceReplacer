@@ -10,7 +10,7 @@ def open_file(file_path):
     amplitudes, _ = librosa.load(file_path)
     end_time = time()
 
-    print('The file {} has been loaded for {} s'.format(file_path, (end_time - start_time) // 1000))
+    print('The file {} has been loaded for {} s'.format(file_path, end_time - start_time))
 
     return amplitudes.tolist()
 

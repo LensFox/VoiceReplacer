@@ -51,7 +51,7 @@ class NetworkService:
 
         end_time = time()
 
-        print('training ended for {} s'.format((end_time - start_time) // 1000))
+        print('training ended for {} s'.format(end_time - start_time))
 
         open('loss.txt', 'w').write(';'.join(list(map(lambda x: str(x.tolist()), loss_list))))
         return loss_list
