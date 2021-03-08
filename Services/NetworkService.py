@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from time import time
+import random
 
 from Network import Netrowk
 
@@ -18,7 +19,7 @@ class NetworkService:
     def train_network(
         self,
         train_loader, 
-        num_epochs = 1, 
+        num_epochs = 3, 
         learning_rate = 0.0001):
         print('training started')
 
@@ -31,6 +32,8 @@ class NetworkService:
         loss_list = []
 
         for epoch in range(num_epochs):
+            
+            random.shuffle(train_loader)
             for i, (fragments, labels) in enumerate(train_loader):
                 fragments = fragments.cuda()
                 labels = labels.cuda()

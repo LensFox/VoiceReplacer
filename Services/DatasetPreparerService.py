@@ -1,4 +1,3 @@
-import random
 import os
 
 from AudioFileLoader import open_file, save_file
@@ -22,8 +21,6 @@ class DatasetPreparerService:
 
             current_data_loader = prepare_data_loader(feature_amplitudes, mask_amplitudes)
             data_loader = data_loader + current_data_loader
-            
-        random.shuffle(data_loader)
 
         return data_loader
 
