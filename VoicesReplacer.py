@@ -9,7 +9,7 @@ audio_path = '../audio/КиШ- Лесник.mp3'
 features_folder_path = '../audio/features'
 masks_folder_path = '../audio/masks'
 
-need_train = True
+need_train = False
 need_create_audio = False
 need_print_loss = True
 

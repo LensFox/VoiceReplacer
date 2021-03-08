@@ -30,6 +30,7 @@ def get_fragments(clear_amplitudes):
     fraims = make_fraims(amplitudes)
 
     fragments = zip_fraims_to_fragments(fraims)
+    fragments = torch.Tensor(fragments)
 
     return fragments
 
@@ -41,6 +42,15 @@ def get_masks(mask_amplitudes):
     for i in range(len(fraims)):
         for j in range(FRAIM_SIZE):
             fraims[i][j] = 1 if abs(fraims[i][j]) >= VALUE_THRESHOLD else 0
-    fraims = torch.Tensor(fraims).reshape((-1, 1, FRAIM_SIZE)).tolist()
+    fraims = torch.Tensor(fraims).reshape((-1, 1, FRAIM_SIZE))
 
     return fraims
+
+
+def prepare_data_loader(clear_amplitudes, mask_amplitudes):
+    feature_fragments = get_fragments(clear_amplitudes)
+    mask_fraims = get_masks(mask_amplitudes)
+
+    data_loader = [(feature_fragments[i], mask_fraims[i]) for i in range(len(mask_fraims))]
+
+    return data_loader
