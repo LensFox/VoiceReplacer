@@ -56,13 +56,13 @@ class Netrowk(nn.Module):
         self.linear_1 = nn.Sequential(
            nn.Linear(
                in_features=1824,
-               out_features=256),
+               out_features=128),
            nn.LeakyReLU())
         # (128) => (128)
         self.dropout_3 = nn.Dropout()
         # (128) => (513)
         self.linear_output = nn.Linear(
-            in_features=256,
+            in_features=128,
             out_features=513)
 
     def forward(self, fragment):
