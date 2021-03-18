@@ -62,11 +62,20 @@ class NetworkService:
 
 
     def get_fragments_masks(self, fragments):
+        sigmoid = nn.Sigmoid()
+
         masks = []
+        clear_values = []
         for fragment in fragments:
             fragment = fragment.cuda()
+
             fragment_mask = self.network(fragment).data.cpu()
+            fragment_mask = sigmoid(fragment_mask)
+
             masks.append(fragment_mask)
+
+            clear_mask = fragment_mask.tolist()
+            clear_values.extend(clear_mask)
 
         return masks
 

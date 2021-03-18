@@ -2,7 +2,7 @@ import torch
 
 FRAIM_SIZE = 513
 FRAGMENT_SIZE = 25
-VALUE_THRESHOLD = 1e-4
+VALUE_THRESHOLD = 0.01
 
 def crop_array_to_fit_block_size(amplitudes):
     new_size = len(amplitudes) // FRAIM_SIZE * FRAIM_SIZE
