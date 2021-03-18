@@ -19,7 +19,7 @@ class NetworkService:
     def train_network(
         self,
         train_loader, 
-        num_epochs = 3, 
+        num_epochs = 20, 
         learning_rate = 0.0001):
         print('training started')
 
@@ -39,7 +39,6 @@ class NetworkService:
                 labels = labels.cuda()
 
                 out = self.network(fragments)
-                out = torch.reshape(out, (1, -1))
                 loss = criterion(out, labels)
                 loss_list.append(loss)
 
@@ -47,7 +46,7 @@ class NetworkService:
                 loss.backward()
                 optimizer.step()
                 
-                if (i + 1) % 100 == 0:
+                if (i + 1) % 10 == 0:
                     print('Epoch [{}/{}], Step [{}/{}], Loss: {:.10f}, Mask summ: {:.3f}'
                           .format(epoch + 1, num_epochs, i + 1, total_steps, loss.item(), torch.sum(labels).tolist()))
 

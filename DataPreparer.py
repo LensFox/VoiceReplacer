@@ -1,4 +1,5 @@
 import torch
+import random
 
 FRAIM_SIZE = 513
 FRAGMENT_SIZE = 25
@@ -18,23 +19,21 @@ def zip_fraims_to_fragments(fraims):
 
     for i in range(0, fraims_count - FRAGMENT_SIZE):
         new_fragment = fraims[i : i + FRAGMENT_SIZE]
-        new_fragment = [[new_fragment]]
+        new_fragment = [new_fragment]
         fragments.append(new_fragment)
 
     return fragments
 
-
-def get_fragments(clear_amplitudes):
+def get_feature_fragments(clear_amplitudes):
     amplitudes = crop_array_to_fit_block_size(clear_amplitudes)
 
     fraims = make_fraims(amplitudes)
 
     fragments = zip_fraims_to_fragments(fraims)
-    fragments = torch.Tensor(fragments)
 
     return fragments
 
-def get_masks(mask_amplitudes):
+def get_mask_fraims(mask_amplitudes):
     amplitudes = crop_array_to_fit_block_size(mask_amplitudes)
     
     fraims = make_fraims(amplitudes)
@@ -42,15 +41,25 @@ def get_masks(mask_amplitudes):
     for i in range(len(fraims)):
         for j in range(FRAIM_SIZE):
             fraims[i][j] = 1 if abs(fraims[i][j]) >= VALUE_THRESHOLD else 0
-    fraims = torch.Tensor(fraims).reshape((-1, 1, FRAIM_SIZE))
+    fraims = torch.Tensor(fraims).reshape((-1, FRAIM_SIZE)).tolist()
 
     return fraims
 
+def prepare_data_loader(feature_fragments, mask_fraims, batch_size = 100):
+    feature_loader = []
+    mask_loader = []
 
-def prepare_data_loader(clear_amplitudes, mask_amplitudes):
-    feature_fragments = get_fragments(clear_amplitudes)
-    mask_fraims = get_masks(mask_amplitudes)
+    unbatched_data_loader = [(feature_fragments[i], mask_fraims[i]) for i in range(len(feature_fragments))]
+    random.shuffle(unbatched_data_loader)
 
-    data_loader = [(feature_fragments[i], mask_fraims[i]) for i in range(len(mask_fraims))]
+    for i in range(len(unbatched_data_loader)):
+        if i % batch_size == 0:
+            feature_loader.append([])
+            mask_loader.append([])
 
-    return data_loader
+        fragment, mask = unbatched_data_loader[i]
+
+        feature_loader[-1].append(fragment)
+        mask_loader[-1].append(mask)
+
+    return [(torch.Tensor(feature_loader[i]), torch.Tensor(mask_loader[i])) for i in range(len(feature_loader))]
