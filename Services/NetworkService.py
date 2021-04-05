@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from time import time
-import random
 
 from Network import Netrowk
 
@@ -19,7 +18,12 @@ class NetworkService:
     def train_network(
         self,
         train_loader, 
-        num_epochs = 20, 
+        global_epoch_index,
+        global_epoches_count,
+        local_epoch_index,
+        local_epoches_count,
+        block_index,
+        blocks_count,
         learning_rate = 0.0001):
         print('training started')
 
@@ -31,24 +35,29 @@ class NetworkService:
         total_steps = len(train_loader)
         loss_list = []
 
-        for epoch in range(num_epochs):
-            
-            random.shuffle(train_loader)
-            for i, (fragments, labels) in enumerate(train_loader):
-                fragments = fragments.cuda()
-                labels = labels.cuda()
+        epoch_index = local_epoch_index * local_epoches_count * global_epoch_index
+        epoches_count = local_epoches_count * global_epoches_count
 
-                out = self.network(fragments)
-                loss = criterion(out, labels)
-                loss_list.append(loss)
+        for step_index, (fragments, labels) in enumerate(train_loader):
+            fragments = fragments.cuda()
+            labels = labels.cuda()
 
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+            out = self.network(fragments)
+            loss = criterion(out, labels)
+            loss_list.append(loss)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
                 
-                if (i + 1) % 10 == 0:
-                    print('Epoch [{}/{}], Step [{}/{}], Loss: {:.10f}, Mask summ: {:.3f}'
-                          .format(epoch + 1, num_epochs, i + 1, total_steps, loss.item(), torch.sum(labels).tolist()))
+            if (step_index + 1) % 10 == 0:
+                print('Epoch [{}/{}], Block [{}/{}], Step [{}/{}], Loss: {:.10f}, Mask summ: {:.3f}'
+                        .format(
+                           epoch_index + 1, epoches_count,
+                           block_index + 1, blocks_count, 
+                           step_index + 1, total_steps, 
+                           loss.item(), 
+                           torch.sum(labels).tolist()))
 
         self.__save_model()
 

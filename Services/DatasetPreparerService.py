@@ -1,4 +1,3 @@
-import os
 from time import time
 import torch
 
@@ -7,18 +6,11 @@ from DataPreparer import get_feature_fragments, get_mask_fraims, prepare_data_lo
 
 class DatasetPreparerService:
 
-    def prepare_data_to_train(self, features_folder, masks_folder):
-        feature_file_names = self.__get_all_file_names_in_folder(features_folder)
-        mask_file_names = self.__get_all_file_names_in_folder(masks_folder)
-        assert len(feature_file_names) == len(mask_file_names)
-
+    def prepare_data_to_train(self, file_names):
         feature_fragments = []
         mask_fraims = []
 
-        for i in range(len(feature_file_names)):
-            feature_path = feature_file_names[i]
-            mask_path = mask_file_names[i]
-
+        for feature_path, mask_path in file_names:
             feature_amplitudes = open_file(feature_path)
             mask_amplitudes = open_file(mask_path)
 
@@ -42,10 +34,3 @@ class DatasetPreparerService:
         fragments = torch.Tensor(fragments).view(-1, 1, 1, FRAGMENT_SIZE, FRAIM_SIZE)
 
         return (feature_amplitudes, fragments)
-
-
-    def __get_all_file_names_in_folder(self, folder_path):
-        file_names = os.listdir(folder_path)
-        file_names = list(map(lambda file_name: os.path.join(folder_path, file_name), file_names))
-
-        return file_names
